@@ -41,9 +41,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\client20710711.dll</HintPath>
     </Reference>
-    <Reference Include="Logrila.Logging">
-      <HintPath>..\..\..\下载\Cowboy-master\Cowboy-master\Cowboy\packages\Logrila.Logging.1.0.3.0\lib\net46\Logrila.Logging.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Newtonsoft.Json.dll</HintPath>
