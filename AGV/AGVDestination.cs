@@ -14,6 +14,9 @@ namespace TASK.AGV
     public class AGVDestination
     {
 
+        private static int[] wAgv =new int [MapRead.LWorkPlace+MapRead.RWorkPlace];
+        private const int MIN_COUNT = 4;
+
         //  MapRead MapRead = new MapRead();
         public static int seed = 400;
         static Random rd = new Random(seed);
@@ -115,13 +118,15 @@ namespace TASK.AGV
         //三个工件台就近最少排队原则
         public static  int  ThreeLeast(AGVInformation agv, int x, int y)
         {
+            int workStart = 0;
+            
+
             int agvnum = agv.Number;
             int choosework = 0;
             if (y < (MapRead.wnum / 2))
             {
                 //选定三个相邻的工件台
                 #region
-                int workStart = 0;
                 for (int i = 0; i < MapRead.LWorkPlace; i++)
                    // for (int j = 0; j < MapRead.Entrance; j++)
                     {
@@ -169,7 +174,6 @@ namespace TASK.AGV
             {
                 //选定三个相邻的工件台
                 #region
-                int workStart = 0;
                 for (int i = 0; i < MapRead.RWorkPlace; i++)
                     //for (int j = 0; j < MapRead.Entrance; j++)
                     {
@@ -211,9 +215,41 @@ namespace TASK.AGV
                         choosework = workStart + 2;
                     }
                 }
+                choosework += MapRead.LWorkPlace;
                 //return choosework;
             }
             return choosework;
+        }
+        /// <summary>
+        ///如果工作台的agv小车相差过大，直接就把agv分配给少的，不管离工作台近不近，
+        /// </summary>
+        /// <returns>相差不大就返回-1，不用考虑均匀分配问题，否则直接返回工作台id</returns>
+        static int AgvLeast()
+        {
+            int min = int.MaxValue;
+            int minIndex=-1;
+            int max = int.MinValue;
+            for (int i = 0; i < wAgv.Length; i++)
+            {
+                if (min > wAgv[i])
+                {
+                    min = wAgv[i];
+                    minIndex=i;
+                }
+                if (max < wAgv[i])
+                {
+                    max = wAgv[i];
+                }
+            }
+            if (max - min > MIN_COUNT)
+            {
+                return minIndex;
+            }
+            else
+            {
+                return -1;
+            }
+
         }
 
         public static  int workj = 0;
@@ -237,26 +273,37 @@ namespace TASK.AGV
             //agv.StartLoc = "RandArea";
             //agv.EndLoc = "WaitArea";
             //agv.State = State.free;
-            int worki = ThreeLeast(agv, x, y);
+
+
+           int worki= AgvLeast();
+           if (worki < 0 || worki>= wAgv.Length)
+           {
+            worki = ThreeLeast(agv, x, y);
+
+           }
+
        
            // agv.WorkNum = worki;
-            if (y < (MapRead.wnum / 2))
+            if (worki<MapRead.LWorkPlace)
             {
                // int worki = agvnum % MapRead.LWorkPlace;
                 agv.EndX = MapRead.lwork[worki,workj].x;
-                agv.EndY = MapRead.lwork[worki, workj].y;
+                agv.EndY = MapRead.lwork[worki,workj].y;
                 MapRead.LW[worki].agventer++;
                 agv.LWorkNum = worki;
                 agv.RWorkNum = -1;
+                wAgv[worki]++;
             }
             else
             {
+                 worki = worki-MapRead.LWorkPlace;
               // int worki = agvnum % MapRead.RWorkPlace;
                 agv.EndX = MapRead.rwork[worki, workj].x;
                 agv.EndY = MapRead.rwork[worki, workj].y;
                 MapRead.RW[worki].agventer++;
                 agv.RWorkNum = worki;
                 agv.LWorkNum = -1;
+                wAgv[worki + MapRead.LWorkPlace]++;
             }
             if (workj == (MapRead.Entrance-1))
             {
@@ -335,25 +382,33 @@ namespace TASK.AGV
             //    agv.State = State.free;
             //MapRead.dest[AGVConstDefine.p[agvnum].destnum].occupy = false;
 
-              int worki = ThreeLeast(agv, x, y);
+              int worki = AgvLeast();
+              if (worki < 0 || worki >= wAgv.Length)
+              {
+                  worki = ThreeLeast(agv, x, y);
+
+              }
             //agv.WorkNum=worki;
-            if (y < (MapRead.wnum / 2))
-            {
+              if (worki < MapRead.LWorkPlace)
+              {
                // int worki = agvnum % MapRead.LWorkPlace;
                 agv.EndX = MapRead.lwork[worki, workj].x;
                 agv.EndY = MapRead.lwork[worki, workj].y;
                 MapRead.LW[worki].agventer++;
                 agv.LWorkNum = worki;
                 agv.RWorkNum = -1;
+                wAgv[worki]++;
             }
             else
             {
+                worki -= MapRead.LWorkPlace;
                //int worki = agvnum % MapRead.RWorkPlace;
                 agv.EndX = MapRead.rwork[worki, workj].x;
                 agv.EndY = MapRead.rwork[worki, workj].y;
                 MapRead.RW[worki].agventer++;
                 agv.RWorkNum = worki;
                 agv.LWorkNum = -1;
+                wAgv[worki + MapRead.LWorkPlace]++;
             }
             if (workj == (MapRead.Entrance - 1))
             {
@@ -381,7 +436,7 @@ namespace TASK.AGV
         }
 
         public static void WaitToScan(AGVInformation agv, int x, int y)
-        {
+        {           
             int agvnum = agv.Number;
             //往前走
             string pathMap = System.Configuration.ConfigurationManager.AppSettings["MAPPath"].ToString();
@@ -435,6 +490,7 @@ namespace TASK.AGV
 
         public static void ScanToDest(AGVInformation agv, int x, int y)
         {
+
         
             int agvnum = agv.Number;
             //选中任意一个DestArea
@@ -494,6 +550,7 @@ namespace TASK.AGV
            // {
             if (agv.LWorkNum != -1 && MapRead.LW[agv.LWorkNum].agventer > 0)
             {
+                wAgv[agv.LWorkNum]--;
                 int la = MapRead.LW[agv.LWorkNum].agventer;
                 MapRead.LW[agv.LWorkNum].agventer--;
                 agv.LWorkNum = -1;
@@ -504,6 +561,7 @@ namespace TASK.AGV
            ////////// {
             else if (agv.RWorkNum != -1 && MapRead.RW[agv.RWorkNum].agventer > 0)
             {
+                wAgv[agv.RWorkNum + MapRead.LWorkPlace]--;
                 int ra = MapRead.RW[agv.RWorkNum].agventer;
                 MapRead.RW[agv.RWorkNum].agventer--;
                 agv.RWorkNum = -1;
