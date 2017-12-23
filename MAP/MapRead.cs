@@ -6,7 +6,7 @@ using AGV_TASK;
 using System.Xml;
 using Const;
 
-namespace TASK.MAP
+namespace TASK.XUMAP
 {
  public   class MapRead
     {
@@ -55,10 +55,10 @@ namespace TASK.MAP
         public static int hnum;
 
 
-        //public static MAP[] Lwait;
-        //public static MAP[] Rwait;
-        //public static MAP[] LWW;
-        //public static MAP[] RWW;
+        //public static XUMAP[] Lwait;
+        //public static XUMAP[] Rwait;
+        //public static XUMAP[] LWW;
+        //public static XUMAP[] RWW;
         //public static int lwaitnum;
         //public static int rwaitnum;
 
@@ -231,12 +231,12 @@ namespace TASK.MAP
 
            // XmlNode LWAIT = xmlfile.SelectSingleNode("config/Map/LWaitnum");
            //lwaitnum = Convert.ToInt32(LWAIT.InnerText);
-           // Lwait = new MAP[lwaitnum];
+           // Lwait = new XUMAP[lwaitnum];
            Lsc = new MAP[LWorkPlace*2];
 
            // XmlNode RWAIT = xmlfile.SelectSingleNode("config/Map/RWaitnum");
            // rwaitnum = Convert.ToInt32(RWAIT.InnerText);
-           // Rwait = new MAP[rwaitnum];
+           // Rwait = new XUMAP[rwaitnum];
             Rsc = new MAP[RWorkPlace*2];
 
             XmlNode DEST = xmlfile.SelectSingleNode("config/Map/Destnum");
@@ -319,7 +319,7 @@ namespace TASK.MAP
                 //    tdx = Convert.ToInt32(td[0]);
                 //    tdy = Convert.ToInt32(td[1]);
 
-                //    MAP twait = new MAP();
+                //    XUMAP twait = new XUMAP();
                 //    twait.x = tdx;
                 //    twait.y = tdy;
                 //    twait.occupy = false;
@@ -377,12 +377,12 @@ namespace TASK.MAP
 
             //处理排队区
             //bubbleWait(Lwait, lwaitnum);
-            //LWW = new MAP[lwaitnum];
+            //LWW = new XUMAP[lwaitnum];
             //RandWait(Lwait, LWW);
          
 
             //bubbleWait(Rwait, rwaitnum);
-            //RWW = new MAP[rwaitnum];
+            //RWW = new XUMAP[rwaitnum];
             //RandWait(Rwait,RWW);
            //处理投放口
             bubbleWait(dest, destnum);

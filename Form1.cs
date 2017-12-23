@@ -18,7 +18,7 @@ using Newtonsoft.Json;
 using TASK.AGV;
 using AGV_V1._0;
 using AGV_TASK.MSG;
-using TASK.MAP;
+using TASK.XUMAP;
 using client20710711;
 using Cowboy.Sockets;
 

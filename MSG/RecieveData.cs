@@ -18,7 +18,7 @@ using VideoCoding.Services;
 using AGV_TASK;
 using TASK.MSG;
 using TASK.AGV;
-using TASK.MAP;
+using TASK.XUMAP;
 using Newtonsoft.Json;
 using AGV_V1._0;
 using AGV_TASK.MSG;
@@ -221,14 +221,14 @@ namespace TASK.MSG
             //    //    }
             //    //    #endregion
             //    //    #region//获取MAP文件
-            //    //    else if (strContent.Substring(0, startJson) == "PATH:MAP")
+            //    //    else if (strContent.Substring(0, startJson) == "PATH:XUMAP")
             //    //    {
             //    //        //string path = "../../ElcMap.xml";//System.AppDomain.CurrentDomain.SetupInformation.ApplicationBase+
             //    //        //// string path ="../../ElcMap.xml";
             //    //        //reciveFile(path, buffer, r); 
 
             //    //        mread.MAP_classify();
-            //    //        //frm.tb_MAP.Text = "PATH:MAP[]";
+            //    //        //frm.tb_MAP.Text = "PATH:XUMAP[]";
             //    //    }
             //    //    #endregion
             //    //    #region//获得AGV文件

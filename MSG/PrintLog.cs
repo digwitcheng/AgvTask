@@ -18,7 +18,7 @@ using VideoCoding.Services;
 using AGV_TASK;
 using TASK.MSG;
 using TASK.AGV;
-using TASK.MAP;
+using TASK.XUMAP;
 using Newtonsoft.Json;
 using AGV_V1._0;
 

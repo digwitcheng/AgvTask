@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TASK.AGV;
-using TASK.MAP;
+using TASK.XUMAP;
 using System.Windows.Forms;
 
 namespace Const

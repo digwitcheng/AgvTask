@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TASK.AGV;
-using TASK.MAP;
+using TASK.XUMAP;
 using TASK.MSG;
 
 namespace AGV_TASK.MSG

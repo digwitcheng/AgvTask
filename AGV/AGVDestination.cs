@@ -5,7 +5,7 @@ using System.Text;
 using TASK.AGV;
 using Const;
 using AGV_TASK;
-using TASK.MAP;
+using TASK.XUMAP;
 using System.Threading;
 using System.Xml;
 
@@ -121,99 +121,108 @@ namespace TASK.AGV
             {
                 //选定三个相邻的工件台
                 #region
-                int workStart = 0;
-                for (int i = 0; i < MapRead.LWorkPlace; i++)
-                   // for (int j = 0; j < MapRead.Entrance; j++)
-                    {
-                       // if (System.Math.Abs(x - MapRead.lwork[i, j].x) <= 3)
-                        if (System.Math.Abs(x - MapRead.LW[i].x) <= 6)
-                        {
-                            if (i == 0)
-                            {
-                                workStart = i;
-                                break;
-                            }
-                            else if (i > 0 && i + 1 < MapRead.LWorkPlace)
-                            {
-                                workStart = i - 1;
-                                break;
-                            }
-                            else
-                            {
-                                workStart = i - 2;
-                                break;
-                            }
-                        }
-                    }
+                int workStart = ChooseWorkStart(MapRead.LW, x);
                 #endregion
                 //选择最少被锁定排队的工件台
                 //int choosework = 0;
-                if (MapRead.LW[workStart].agventer < MapRead.LW[workStart + 1].agventer)
-                {
-                    choosework = workStart;
-                }
-                else
-                {
-                    if (MapRead.LW[workStart + 1].agventer < MapRead.LW[workStart + 2].agventer)
-                    {
-                        choosework = workStart + 1;
-                    }
-                    else
-                    {
-                        choosework = workStart + 2;
-                    }
-                }
-                //return choosework;
+                choosework = MinAgvIndex(MapRead.LW,workStart);
             }
             else if(y>=(MapRead.wnum/2))
             {
                 //选定三个相邻的工件台
                 #region
-                int workStart = 0;
-                for (int i = 0; i < MapRead.RWorkPlace; i++)
-                    //for (int j = 0; j < MapRead.Entrance; j++)
-                    {
-                       // if (System.Math.Abs(x - MapRead.rwork[i, j].x) <= 3)
-                        if (System.Math.Abs(x - MapRead.RW[i].x) <= 6)
-                        {
-                            if (i == 0)
-                            {
-                                workStart = i;
-                                break;
-                            }
-                            else if (i > 0 && i + 1 < MapRead.RWorkPlace)
-                            {
-                                workStart = i - 1;
-                                break;
-                            }
-                            else
-                            {
-                                workStart = i - 2;
-                                break;
-                            }
-                        }
-                    }
+                int workStart = ChooseWorkStart(MapRead.RW, x);
                 #endregion
                 //选择最少被锁定排队的工件台
                 //int choosework = 0;
-                if (MapRead.RW[workStart].agventer < MapRead.RW[workStart + 1].agventer)
-                {
-                    choosework = workStart;
-                }
-                else
-                {
-                    if (MapRead.RW[workStart + 1].agventer < MapRead.RW[workStart + 2].agventer)
-                    {
-                        choosework = workStart + 1;
-                    }
-                    else
-                    {
-                        choosework = workStart + 2;
-                    }
-                }
-                //return choosework;
+                choosework = MinAgvIndex(MapRead.RW,workStart);
             }
             return choosework;
+        }
+        static int ChooseWorkStart(MAP[] MAPArray,int x)
+        {
+            int workStart = 0;
+
+            //for (int i = 0; i < MapRead.RWorkPlace; i++)
+            ////for (int j = 0; j < MapRead.Entrance; j++)
+            //{
+            //    // if (System.Math.Abs(x - MapRead.rwork[i, j].x) <= 3)
+            //    if (System.Math.Abs(x - MapRead.RW[i].x) <= 6)
+            //    {
+            //        if (i == 0)
+            //        {
+            //            workStart = i;
+            //            break;
+            //        }
+            //        else if (i > 0 && i + 1 < MapRead.RWorkPlace)
+            //        {
+            //            workStart = i - 1;
+            //            break;
+            //        }
+            //        else
+            //        {
+            //            workStart = i - 2;
+            //            break;
+            //        }
+            //    }
+            //}
+
+            int min = int.MaxValue;
+            for (int i = 0; i < MAPArray.Length; i++)
+            //for (int j = 0; j < MapRead.Entrance; j++)
+            {
+                // if (System.Math.Abs(x - MapRead.rwork[i, j].x) <= 3)
+                if (Math.Abs(x - MAPArray[i].x) < min)
+                {
+                    min = Math.Abs(x - MAPArray[i].x);
+                    workStart = i;
+                }
+            }
+            if (workStart > 0)
+            {
+                workStart = workStart - 1;
+            }
+            if (workStart == MAPArray.Length - 2)
+            {
+                workStart = workStart - 1;
+            }
+            
+            return workStart;
+        }
+       
+       static int MinAgvIndex(MAP[] MAPArray,int workStart)
+        {
+            //int choosework = 0;
+
+            //if (MAPArray[workStart].agventer < MAPArray[workStart + 1].agventer)
+            //{
+            //    choosework = workStart;
+            //}
+            //else
+            //{
+            //    if (MAPArray[workStart + 1].agventer < MAPArray[workStart + 2].agventer)
+            //    {
+            //        choosework = workStart + 1;
+            //    }
+            //    else
+            //    {
+            //        choosework = workStart + 2;
+            //    }
+            //}
+            //return choosework;
+
+
+            int min = int.MaxValue;
+            int minIndex = 0;
+            for (int i = workStart; i < workStart+3; i++)
+            {
+                if (min > MAPArray[i].agventer)
+                {
+                    min = MAPArray[i].agventer;
+                    minIndex = i;
+                }
+            }
+            return minIndex;
         }
 
         public static  int workj = 0;
