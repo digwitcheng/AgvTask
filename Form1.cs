@@ -35,14 +35,6 @@ namespace AGV_TASK
         {
             InitializeComponent();
 
-           // LoadFile();
-
-            ////初始化socket
-            //ImsNetManager.Instance.ReadConfguration();
-            ////开始连接
-            //ImsNetManager.Instance.Init();
-            ////启动发送消息和记录日志线程
-            //ImsNetManager.Instance.ThreadStart();
 
             
             ConnectToServer();
