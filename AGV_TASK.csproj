@@ -73,7 +73,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="222222.cs" />
     <Compile Include="AGV\AGVDestination.cs" />
     <Compile Include="AGV\AGVInformation.cs" />
     <Compile Include="AGV\AGVRead.cs" />
@@ -106,7 +105,6 @@
     <Compile Include="Threads\ServiceManager.cs" />
     <Compile Include="Threads\ServiceTaskAdapter.cs" />
     <Compile Include="Threads\ServiceTaskEndEventArgs.cs" />
-    <Compile Include="TestClass.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
