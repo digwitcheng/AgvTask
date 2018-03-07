@@ -8,5 +8,7 @@ namespace AGV_TASK
 {
     class _222222
     {
+        //DIWGIT
+
     }
 }
