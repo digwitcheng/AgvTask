@@ -121,14 +121,8 @@
     <Content Include="AGV.xml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="AGV\AGV.xml">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="client20710711.dll" />
     <Content Include="ElcMap.xml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="MAP\MAP.xml">
       <SubType>Designer</SubType>
     </Content>
     <Content Include="NOWTHERESOMECHANGES.txt" />

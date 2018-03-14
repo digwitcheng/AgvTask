@@ -15,16 +15,16 @@ namespace Const
         public const byte AGV_FILE = 3;
       //  public static  AGVInformation[] AGV=new AGVInformation [500];
         public static AGVInformation[] AGV;
-        public static MAP[] rest = new MAP[1000];
+        public static MAP[] Rest = new MAP[1000];
         public static MAP[] wait = new MAP[500];
-        public static MAP[] dest = new MAP[1000];
+        public static MAP[] Destination = new MAP[1000];
         public static MAP[] QQ = new MAP[1000];
         public static int  AGVSUM=0;
         public static int AfterScanPause_Time = 500;
         public static  List<ListViewItem> listItem = new List<ListViewItem>();
         public struct DEST
         {
-            public int destnum;
+            public int destinationNum;
         }
        public static  DEST[] p = new DEST [500];
 

@@ -285,9 +285,9 @@ namespace AGV_TASK
             // _del = new showdelegate(UpdateBox);
             //string str= ImsRecvTask.getstring();
             // _del(str);
-            HandleData(sender, new MessageEventArgs(MessageType.move,""));
+           // HandleData(sender, new MessageEventArgs(MessageType.move,""));
         }
-
+       
         public static int agvarrive=0;
         public void timer1_Tick(object sender, EventArgs e)
         {
@@ -499,6 +499,11 @@ namespace AGV_TASK
               listBox1.Items.Add(json);
               
 
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            HandleData(sender, new MessageEventArgs(MessageType.move, ""));
         }
     }
 }

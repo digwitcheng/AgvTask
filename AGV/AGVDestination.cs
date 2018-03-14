@@ -34,7 +34,7 @@ namespace TASK.AGV
 
                 if (startloc != "DestArea")
                 {
-                    //表演1.0
+                    //工作1.0
                     RandToWait(agv, x, y);
 
                 }
@@ -45,12 +45,12 @@ namespace TASK.AGV
             }
             else if (startloc == "WaitArea" && endloc == "ScanArea")
             {
-                //表演2.0
+                //工作2.0
                 WaitToScan(agv, x, y);
             }
             else if (startloc == "ScanArea" && endloc == "DestArea")
             {
-                //表演3.0
+                //工作3.0
                 ScanToDest(agv, x, y);
             }
             else if (startloc == "DestArea" && endloc == "DestArea")
@@ -112,49 +112,52 @@ namespace TASK.AGV
             agv.State = State.free;
         }
 
-        //三个工件台就近最少排队原则
+        //选择较近的三个工件台中的最少排队的一个工件台
         public static  int  ThreeLeast(AGVInformation agv, int x, int y)
         {
             int agvnum = agv.Number;
             int choosework = 0;
-            if (y < (MapRead.wnum / 2))
+
+            int side = 0;//0,只有右边;1,只有左边;2,两边
+            if (MapRead.leftWorkstationNum != 0 && MapRead.rightWorkstationNum != 0) side = 2;
+            else if (MapRead.rightWorkstationNum == 0) side = 1; 
+
+            if (y < (MapRead.widthNum / side)  && side!=0)
             {
-                //选定三个相邻的工件台
+                //锁定较近的工件台
                 #region
-                int workStart = ChooseWorkStart(MapRead.LW, x);
+                int workStart = NearestWorkStation(MapRead.LeftWork, x);
                 #endregion
-                //选择最少被锁定排队的工件台
+                //再选当前排队中最少的一个工件台
                 //int choosework = 0;
-                choosework = MinAgvIndex(MapRead.LW,workStart);
+                choosework = LeastEntrance(MapRead.LeftWork,workStart);
             }
-            else if(y>=(MapRead.wnum/2))
+            else
             {
                 //选定三个相邻的工件台
-                #region
-                int workStart = ChooseWorkStart(MapRead.RW, x);
-                #endregion
+                int workStart = NearestWorkStation(MapRead.RightWork, x);
                 //选择最少被锁定排队的工件台
                 //int choosework = 0;
-                choosework = MinAgvIndex(MapRead.RW,workStart);
+                choosework = LeastEntrance(MapRead.RightWork,workStart);
             }
             return choosework;
         }
-        static int ChooseWorkStart(MAP[] MAPArray,int x)
+        static int NearestWorkStation(MAP[] MAPArray,int x)
         {
             int workStart = 0;
 
-            //for (int i = 0; i < MapRead.RWorkPlace; i++)
-            ////for (int j = 0; j < MapRead.Entrance; j++)
+            //for (int i = 0; i < MapRead.rightWorkstationNum; i++)
+            ////for (int j = 0; j < MapRead.entranceNum; j++)
             //{
-            //    // if (System.Math.Abs(x - MapRead.rwork[i, j].x) <= 3)
-            //    if (System.Math.Abs(x - MapRead.RW[i].x) <= 6)
+            //    // if (System.Math.Abs(x - MapRead.RightWorkstation[i, j].x) <= 3)
+            //    if (System.Math.Abs(x - MapRead.RightWork[i].x) <= 6)
             //    {
             //        if (i == 0)
             //        {
             //            workStart = i;
             //            break;
             //        }
-            //        else if (i > 0 && i + 1 < MapRead.RWorkPlace)
+            //        else if (i > 0 && i + 1 < MapRead.rightWorkstationNum)
             //        {
             //            workStart = i - 1;
             //            break;
@@ -169,16 +172,17 @@ namespace TASK.AGV
 
             int min = int.MaxValue;
             for (int i = 0; i < MAPArray.Length; i++)
-            //for (int j = 0; j < MapRead.Entrance; j++)
+            //for (int j = 0; j < MapRead.entranceNum; j++)
             {
-                // if (System.Math.Abs(x - MapRead.rwork[i, j].x) <= 3)
+                // if (System.Math.Abs(x - MapRead.RightWorkstation[i, j].x) <= 3)
                 if (Math.Abs(x - MAPArray[i].x) < min)
                 {
                     min = Math.Abs(x - MAPArray[i].x);
                     workStart = i;
                 }
             }
-            if (workStart > 0)
+            /* hxc 2017.12
+            if (workStart > 0 && workStart < MAPArray.Length - 1)
             {
                 workStart = workStart - 1;
             }
@@ -186,21 +190,33 @@ namespace TASK.AGV
             {
                 workStart = workStart - 1;
             }
-            
+            */
+
+            //xzy 2018.3.11 
+            if (workStart > 0 && workStart < MAPArray.Length - 1)
+            {
+                workStart = workStart - 1;
+            }
+            else if (workStart == MAPArray.Length - 1)
+            {
+                //xzy 2018.3.11 考虑工件台个数
+                if (MAPArray.Length >= 3) workStart = workStart - 2;
+                else if (MAPArray.Length < 3 ) workStart = 0;
+            }
+
             return workStart;
         }
-       
-       static int MinAgvIndex(MAP[] MAPArray,int workStart)
+       static int LeastEntrance(MAP[] MAPArray,int workStart)
         {
             //int choosework = 0;
 
-            //if (MAPArray[workStart].agventer < MAPArray[workStart + 1].agventer)
+            //if (MAPArray[workStart].agvNumOfQueuing < MAPArray[workStart + 1].agvNumOfQueuing)
             //{
             //    choosework = workStart;
             //}
             //else
             //{
-            //    if (MAPArray[workStart + 1].agventer < MAPArray[workStart + 2].agventer)
+            //    if (MAPArray[workStart + 1].agvNumOfQueuing < MAPArray[workStart + 2].agvNumOfQueuing)
             //    {
             //        choosework = workStart + 1;
             //    }
@@ -214,68 +230,99 @@ namespace TASK.AGV
 
             int min = int.MaxValue;
             int minIndex = 0;
-            for (int i = workStart; i < workStart+3; i++)
+            int WorkStationNumSort = 0;
+           //xzy 2018.3.11 考虑工件台个数
+            if (MAPArray.Length >= 3) WorkStationNumSort = 3;
+            else WorkStationNumSort = MAPArray.Length;
+
+            for (int i = workStart; i < workStart + WorkStationNumSort; i++)
             {
-                if (min > MAPArray[i].agventer)
+                if (min > MAPArray[i].agvNumOfQueuing)
                 {
-                    min = MAPArray[i].agventer;
+                    min = MAPArray[i].agvNumOfQueuing;
                     minIndex = i;
                 }
             }
             return minIndex;
         }
 
-        public static  int workj = 0;
+
+      
         //按照小车编号，按照顺序
         public static void RandToWait(AGVInformation agv, int x, int y)
         {
-
-
             int agvnum = agv.Number;
-            //小车
-            //if (y < (MapRead.wnum/2) )
-            //{
-            //    agv.EndX = MapRead.LWW[agvnum % MapRead.lw ].x;
-            //    agv.EndY = MapRead.LWW[agvnum % MapRead.lw].y;
-            //}
-            //else
-            //{
-            //    agv.EndX = MapRead.RWW[agvnum % MapRead.rw].x;
-            //    agv.EndY = MapRead.RWW[agvnum % MapRead.rw].y;
-            //}
-            //agv.StartLoc = "RandArea";
-            //agv.EndLoc = "WaitArea";
-            //agv.State = State.free;
-            int worki = ThreeLeast(agv, x, y);
-       
+            int worki = ThreeLeast(agv, x, y), workj = 0;
+            agv.WorkStaionPassBy = worki;
            // agv.WorkNum = worki;
-            if (y < (MapRead.wnum / 2))
+            //xzy 2017 排队区有左右两边
+           // if (y < (MapRead.widthNum / 2))
+
+            //xzy 2018.3 考虑排队区是否在左右两边
+            int side = 0 ;//0,只有右边;1,只有左边;2,两边
+            if (MapRead.leftWorkstationNum != 0 && MapRead.rightWorkstationNum != 0) side = 2;
+            else if (MapRead.rightWorkstationNum == 0) side = 1; 
+
+            if (y < (MapRead.widthNum / side) &&  side !=0 )
             {
-               // int worki = agvnum % MapRead.LWorkPlace;
-                agv.EndX = MapRead.lwork[worki,workj].x;
-                agv.EndY = MapRead.lwork[worki, workj].y;
-                MapRead.LW[worki].agventer++;
+                while (MapRead.LeftWorkstation[worki, workj].occupy == true)
+                {
+                    if (workj == (MapRead.entranceNum - 1))
+                    {
+                        workj = 0;
+                        for (int i = 0; i < MapRead.entranceNum; i++)
+                            MapRead.LeftWorkstation[worki, i].occupy = false;
+                    }
+                    else
+                    { workj++; }
+                }
+                agv.EndX = MapRead.LeftWorkstation[worki,workj].x;
+                agv.EndY = MapRead.LeftWorkstation[worki, workj].y;
+                MapRead.LeftWork[worki].agvNumOfQueuing++;
+                MapRead.LeftWorkstation[worki, workj].occupy = true;
                 agv.LWorkNum = worki;
                 agv.RWorkNum = -1;
             }
-            else
+            else 
             {
-              // int worki = agvnum % MapRead.RWorkPlace;
-                agv.EndX = MapRead.rwork[worki, workj].x;
-                agv.EndY = MapRead.rwork[worki, workj].y;
-                MapRead.RW[worki].agventer++;
+                while (MapRead.RightWorkstation[worki, workj].occupy == true)
+                {
+                    if (workj == (MapRead.entranceNum - 1))
+                    {
+                        workj = 0;
+                        for (int i = 0; i < MapRead.entranceNum; i++)
+                            MapRead.RightWorkstation[worki, i].occupy = false;
+                    }
+                    else
+                    { workj++; }
+                }
+              // int worki = agvnum % MapRead.rightWorkstationNum;
+                agv.EndX = MapRead.RightWorkstation[worki, workj].x;
+                agv.EndY = MapRead.RightWorkstation[worki, workj].y;
+                MapRead.RightWork[worki].agvNumOfQueuing++;
+                MapRead.RightWorkstation[worki, workj].occupy = true;
                 agv.RWorkNum = worki;
                 agv.LWorkNum = -1;
+             //   MapRead.RightWorkstation[worki, workj].occupy = true;
             }
-            if (workj == (MapRead.Entrance-1))
-            {
+            //while (MapRead.RightWorkstation[worki, workj].occupy == true)
+            //{ 
+            //    workj++;
+            //    if (workj == (MapRead.entranceNum - 1))
+            //    {
 
-                workj = 0;
-            }
-            else
-            {
-                workj++;
-            }
+            //        workj = 0;
+            //    }
+            //}
+            //if (workj == (MapRead.entranceNum-1))
+            //{
+
+            //    workj = 0;
+            //}
+            //else
+            //{
+            //    workj++;
+            //}
 
             //agv.StartLoc = "RandArea";
             agv.EndLoc = "WaitArea";
@@ -342,37 +389,74 @@ namespace TASK.AGV
             //        }
             //    }
             //    agv.State = State.free;
-            //MapRead.dest[AGVConstDefine.p[agvnum].destnum].occupy = false;
+            //MapRead.Destination[AGVConstDefine.p[agvnum].destinationNum].occupy = false;
 
-              int worki = ThreeLeast(agv, x, y);
+              //int worki = ThreeLeast(agv, x, y);
+              int worki = ThreeLeast(agv, x, y), workj = 0;
+              agv.WorkStaionPassBy = worki;
+            
             //agv.WorkNum=worki;
-            if (y < (MapRead.wnum / 2))
+            //xzy 2017 if (y < (MapRead.widthNum / 2))
+
+              //xzy 2018.3 考虑排队区是否在左右两边
+              int side = 0;//0,只有右边;1,只有左边;2,两边
+              //左右两边
+              if (MapRead.leftWorkstationNum != 0 && MapRead.rightWorkstationNum != 0) side = 2;
+              //左边
+              else if (MapRead.rightWorkstationNum == 0) side = 1;
+
+              if (y < (MapRead.widthNum / side) && side != 0)
             {
-               // int worki = agvnum % MapRead.LWorkPlace;
-                agv.EndX = MapRead.lwork[worki, workj].x;
-                agv.EndY = MapRead.lwork[worki, workj].y;
-                MapRead.LW[worki].agventer++;
+                while (MapRead.LeftWorkstation[worki, workj].occupy == true)
+                {
+                    if (workj == (MapRead.entranceNum - 1))
+                    {
+                        workj = 0;
+                        for (int i = 0; i < MapRead.entranceNum; i++)
+                            MapRead.LeftWorkstation[worki, i].occupy = false;
+                    }
+                    else
+                    { workj++; }
+                }
+               // int worki = agvnum % MapRead.leftWorkstationNum;
+                agv.EndX = MapRead.LeftWorkstation[worki, workj].x;
+                agv.EndY = MapRead.LeftWorkstation[worki, workj].y;
+                MapRead.LeftWork[worki].agvNumOfQueuing++;
                 agv.LWorkNum = worki;
                 agv.RWorkNum = -1;
+                MapRead.LeftWorkstation[worki, workj].occupy = true;
             }
             else
             {
-               //int worki = agvnum % MapRead.RWorkPlace;
-                agv.EndX = MapRead.rwork[worki, workj].x;
-                agv.EndY = MapRead.rwork[worki, workj].y;
-                MapRead.RW[worki].agventer++;
+                while (MapRead.RightWorkstation[worki, workj].occupy == true)
+                {
+                    if (workj == (MapRead.entranceNum - 1))
+                    {
+                        workj = 0;
+                        for (int i = 0; i < MapRead.entranceNum; i++)
+                            MapRead.RightWorkstation[worki, i].occupy = false;
+                    }
+                    else
+                    { workj++; }
+                }
+               //int worki = agvnum % MapRead.rightWorkstationNum;
+                agv.EndX = MapRead.RightWorkstation[worki, workj].x;
+                agv.EndY = MapRead.RightWorkstation[worki, workj].y;
+                MapRead.RightWork[worki].agvNumOfQueuing++;
                 agv.RWorkNum = worki;
                 agv.LWorkNum = -1;
+                MapRead.RightWorkstation[worki, workj].occupy = true;
             }
-            if (workj == (MapRead.Entrance - 1))
-            {
+            
+            //if (workj == (MapRead.entranceNum - 1))
+            //{
 
-                workj = 0;
-            }
-            else
-            {
-                workj++;
-            }
+            //    workj = 0;
+            //}
+            //else
+            //{
+            //    workj++;
+            //}
             agv.StartLoc = "DestArea";
             agv.EndLoc = "WaitArea";
             agv.State = State.free;
@@ -403,35 +487,41 @@ namespace TASK.AGV
             string agvxy1 = "config/Grid/td" + x.ToString() + "-" + (y + 1).ToString();
             XmlElement td1 = (XmlElement)xmlfile.SelectSingleNode(agvxy1);
             string tdattr1 = td.Attributes["direction"].InnerText;
-            if (agv.BeginY < 50)
+           //xzy 2017if (agv.BeginY < 50)
+
+            //xzy 2018.3.11
+            int side = 0;//0,只有右边;1,只有左边;2,两边
+            if (MapRead.leftWorkstationNum != 0 && MapRead.rightWorkstationNum != 0) side = 2;
+            else if (MapRead.rightWorkstationNum == 0) side = 1;
+            if (agv.BeginY < (MapRead.widthNum / side) && side != 0)
             {
                 for (int i = 0; i < MapRead.klscan; i++)
                 {
-                    if (System.Math.Abs(MapRead.Lsc[i].x - agv.BeginX) == 0
-                        || System.Math.Abs(MapRead.Lsc[i].x - agv.BeginX) == 1
+                    if (System.Math.Abs(MapRead.LeftScanner[i].x - agv.BeginX) == 0
+                      //  || System.Math.Abs(MapRead.LeftScanner[i].x - agv.BeginX) == 1
                         )
                     {
-                        agv.EndX = MapRead.Lsc[i].x;
-                        agv.EndY = MapRead.Lsc[i].y;
+                        agv.EndX = MapRead.LeftScanner[i].x;
+                        agv.EndY = MapRead.LeftScanner[i].y;
                         agv.Dire = Direction.Left;
-                        //  MapRead.WW[i].occupy = true;
+                        //xzy 2018.3.11 该工件台排队数减少1
+                        MapRead.LeftWork[agv.WorkStaionPassBy].agvNumOfQueuing--;
                         break;
                     }
                 }
             }
-
             else
             {
                 for (int i = 0; i < MapRead.krscan; i++)
                 {
-                    if (System.Math.Abs(MapRead.Rsc[i].x - agv.BeginX) == 0
-                        || System.Math.Abs(MapRead.Rsc[i].x - agv.BeginX) == 1
+                    if (System.Math.Abs(MapRead.RightScanner[i].x - agv.BeginX) == 0
+                       // || System.Math.Abs(MapRead.RightScanner[i].x - agv.BeginX) == 1
                         )
                     {
-                        agv.EndX = MapRead.Rsc[i].x;
-                        agv.EndY = MapRead.Rsc[i].y;
+                        agv.EndX = MapRead.RightScanner[i].x;
+                        agv.EndY = MapRead.RightScanner[i].y;
                         agv.Dire = Direction.Right;
-                        //  MapRead.WW[i].occupy = true;
+                        MapRead.RightWork[agv.WorkStaionPassBy].agvNumOfQueuing--;
                         break;
                     }
                 }
@@ -450,11 +540,11 @@ namespace TASK.AGV
           //  Random rd = new Random(seed);
             int destagvnum;
             int tx, ty;
-            int ss = MapRead.destnum;
+            int ss = MapRead.destinationNum;
             destagvnum = rd.Next(0, ss);
             //已被占用
             //OccuFlag记录被占的投放口
-            //while (MapRead.dest[destagvnum].occupy == true)
+            //while (MapRead.Destination[destagvnum].occupy == true)
             //{
             //    if (seed < 1000)
             //    {
@@ -465,16 +555,14 @@ namespace TASK.AGV
             //        seed = (seed + 400) % 1000;
             //    }
             //    Random rd1 = new Random(seed);
-            //    destagvnum = rd1.Next(0, MapRead.destnum);
+            //    destagvnum = rd1.Next(0, MapRead.destinationNum);
             //}
             //记录的是第agvnum个小车对应的投放口的区域
-            AGVConstDefine.DEST tp = new AGVConstDefine.DEST(); ;
-
-
-            tp.destnum = destagvnum;
+            AGVConstDefine.DEST tp = new AGVConstDefine.DEST();
+            tp.destinationNum = destagvnum;
             AGVConstDefine.p[agvnum] = tp;
-            tx = MapRead.dest[destagvnum].x;
-            ty = MapRead.dest[destagvnum].y;
+            tx = MapRead.Destination[destagvnum].x;
+            ty = MapRead.Destination[destagvnum].y;
             //小车在DestArea下面
             if (agv.BeginX > tx)
             {
@@ -492,29 +580,29 @@ namespace TASK.AGV
                 agv.DestX = tx;
                 agv.DestY = ty;
             }
-             //MapRead.dest[destagvnum].occupy = true;
+             //MapRead.Destination[destagvnum].occupy = true;
 
-           //  MapRead.dest[agv.Number].occupy = true;
+           //  MapRead.Destination[agv.Number].occupy = true;
 
             agv.StartLoc = "ScanArea";
             agv.EndLoc = "DestArea";
             agv.State = State.carried;
-           // if (y < (MapRead.wnum / 2))
+           // if (y < (MapRead.widthnum / 2))
            // {
-            if (agv.LWorkNum != -1 && MapRead.LW[agv.LWorkNum].agventer > 0)
+            if (agv.LWorkNum != -1 && MapRead.LeftWork[agv.LWorkNum].agvNumOfQueuing > 0)
             {
-                int la = MapRead.LW[agv.LWorkNum].agventer;
-                MapRead.LW[agv.LWorkNum].agventer--;
+                int la = MapRead.LeftWork[agv.LWorkNum].agvNumOfQueuing;
+                MapRead.LeftWork[agv.LWorkNum].agvNumOfQueuing--;
                 agv.LWorkNum = -1;
             }
 
            ////////// }
            ////////// else
            ////////// {
-            else if (agv.RWorkNum != -1 && MapRead.RW[agv.RWorkNum].agventer > 0)
+            else if (agv.RWorkNum != -1 && MapRead.RightWork[agv.RWorkNum].agvNumOfQueuing > 0)
             {
-                int ra = MapRead.RW[agv.RWorkNum].agventer;
-                MapRead.RW[agv.RWorkNum].agventer--;
+                int ra = MapRead.RightWork[agv.RWorkNum].agvNumOfQueuing;
+                MapRead.RightWork[agv.RWorkNum].agvNumOfQueuing--;
                 agv.RWorkNum = -1;
             }
           //  }
