@@ -15,11 +15,27 @@ namespace TASK.AGV
     {
 
         //  MapRead MapRead = new MapRead();
-        public static int seed = 400;
+        public static int seed = 4;
         static Random rd = new Random(seed);
-
+        public const int minX = 5;
+        public const int maxX = 7;
+        public const int minY = 6;
+        public const int maxY = 10;
         public static AGVInformation Confirm_EndPoint(AGVInformation agv, string startloc, int x, int y, string endloc)
         {
+
+            int tx = rd.Next(minX, maxX + 1);
+            int ty = rd.Next(minY, maxY + 1);
+            agv.EndX = tx;
+            agv.EndY = ty - 1;
+            agv.DestX = tx;
+            agv.DestY = ty;
+            agv.StartLoc = "ScanArea";
+            agv.EndLoc = "DestArea";
+            agv.State = State.carried;
+
+            return agv;
+
             if (endloc == "RestArea")
             {
                 if (agv.State == State.cannotToDestination)
