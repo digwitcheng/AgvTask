@@ -28,8 +28,10 @@ namespace TASK.AGV
        // public V_State State;
         public State State;
         public string StartLoc;
-        public string EndLoc; 
+        public string EndLoc;  
 
+        //xzy 2018.3.11
+        public int WorkStaionPassBy;
         //无参构造函数
         public AGVInformation()
         {
